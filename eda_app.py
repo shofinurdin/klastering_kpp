@@ -143,16 +143,8 @@ def run_eda_app():
 			st.pyplot(fig)
 
 		with st.expander("Korelasi"):
-
-			
+		
 			corr = df.corr()
-
-			#fig, ax = plt.subplots()
-			#sns.scatterplot(x=data['kolom_1'], y=data['kolom_2'], ax=ax)
-			#ax.set_title('Korelasi antara kolom_1 dan kolom_2')
-
-			#st.pyplot(fig)
-
 			fig, ax = plt.subplots()
 			sns.heatmap(corr, cmap='coolwarm', annot=True, ax=ax, annot_kws={"size":5})
 			ax.set_title('Matriks Korelasi')
