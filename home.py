@@ -54,7 +54,6 @@ def main():
 	else:
 		st.subheader("About")
 		st.text("Prototype ini dibuat menggunakan framework streamlit dengan bahasa pemrograman python")
-		st.text("Shofinurdin : 2111600272")
 		st.text("Shofinurdin@gmail.com")
 
 if __name__ == '__main__':
