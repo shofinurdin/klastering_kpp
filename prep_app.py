@@ -74,7 +74,7 @@ def run_prep_app():
 	df=load_data('data/data_fix.csv')
 	data_awal = load_data('data/data_fix.csv')
 	data_kolom = pilih_kolom(data_awal)
-	submenu = st.sidebar.selectbox("Submenu",['Normalisasi','Pemilihan Variabel','Deteksi Outlier'])
+	submenu = st.sidebar.selectbox("Submenu",['Normalisasi','Deteksi Outlier'])
 	
 
 	if submenu == 'Normalisasi':
@@ -134,26 +134,7 @@ def run_prep_app():
 				#st.write(hts['WP_BENDAHARA'].min())
 				st.dataframe(min_max_ts)
 
-	if submenu=='Pemilihan Variabel':
-
-
-		st.write('Pemilihan Variabel')
-
-		v_in_out = minmax_scaler(data_kolom)
-
-		with st.expander('Variabel Input'):
-			st.write('Variabel Input')
-			vr_in = variabel_input(v_in_out)
-			vi = pd.concat([data_awal['KD_KPP'],vr_in], axis=1)
-			st.dataframe(vi)
-
-
-
-		with st.expander('Variabel Output'):
-			st.write('Variabel Output')
-			vr_out= variabel_output(v_in_out)
-			vo = pd.concat([data_awal['KD_KPP'],vr_out], axis=1)
-			st.dataframe(vo)
+	
 
 	if submenu=='Deteksi Outlier':
 		st.write('Deteksi Outlier')

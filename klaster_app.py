@@ -55,7 +55,7 @@ def run_cl_app():
 	v_in=variabel_input(data_awal)
 	vin_scale=minmax_scaler(v_in)
 	hasil_pca=pca_scale(vin_scale)
-	submenu = st.sidebar.selectbox("Submenu",['Model Awal','Evaluasi'])
+	submenu = st.sidebar.selectbox("Submenu",['Model Awal','Hasil'])
 	if submenu == 'Model Awal':
 		
 		st.write('Model Klastering Awal')
@@ -75,7 +75,8 @@ def run_cl_app():
 			silhouette_list.append(silhouette_avg)
 			dbi_kmed = davies_bouldin_score(vin_scale, y_kmed)
 			dbi_list.append(dbi_kmed)
-			st.write('Nilai Silhouette :{}, Nilai DBI :{}'.format(silhouette_avg,dbi_kmed))
+			st.write('Nilai Silhouette :{:.4f}, Nilai DBI :{:.4f}'.format(silhouette_avg,dbi_kmed))
+			# st.write("Silhouette Score : {:.4f}".format(np.mean(score)))
 			hasil_pca['KMEDOIDS']=y_kmed
 			
 
@@ -102,7 +103,8 @@ def run_cl_app():
 			dbi_list.append(dbi_opt)
 
 			hasil_pca['OPTICSS']=labels_optic
-			st.write('Nilai Silhouette',silhouette_optics)
+			# st.write('Nilai Silhouette',silhouette_optics)
+			st.write('Nilai Silhouette :{:.4f}, Nilai DBI :{:.4f}'.format(silhouette_optics,dbi_opt))
 
 			fig, ax = plt.subplots()
 			scatter = ax.scatter(hasil_pca['Feature A'], hasil_pca['Feature B'], c=hasil_pca['OPTICSS'])
@@ -118,13 +120,14 @@ def run_cl_app():
 			labels_fuzz = np.argmax(u, axis=0)
 			siluete_fcm = silhouette_score(x, labels_fuzz)
 			
-			st.write('Nilai Silhouette :',siluete_fcm)
+			# st.write('Nilai Silhouette :',siluete_fcm)
 
 			silhouette_list.append(siluete_fcm)
 			hasil_pca['FCM']=labels_fuzz
 
 			dbi_fcm = davies_bouldin_score(x, labels_fuzz)
 			dbi_list.append(dbi_fcm)
+			st.write('Nilai Silhouette :{:.4f}, Nilai DBI :{:.4f}'.format(siluete_fcm,dbi_fcm))
 
 			fig, ax = plt.subplots()
 			scatter = ax.scatter(hasil_pca['Feature A'], hasil_pca['Feature B'], c=hasil_pca['FCM'])
@@ -137,12 +140,13 @@ def run_cl_app():
 			labels_db=db.labels_
 			silhouette_score_dbscan = silhouette_score(x, db.labels_)
 			
-			st.write('Nilai Silhouette :', silhouette_score_dbscan)
+			# st.write('Nilai Silhouette :', silhouette_score_dbscan)
 
 			silhouette_list.append(silhouette_score_dbscan)
 
 			dbi_dbs = davies_bouldin_score(x, labels_db)
 			dbi_list.append(dbi_dbs)
+			st.write('Nilai Silhouette :{:.4f}, Nilai DBI :{:.4f}'.format(silhouette_score_dbscan,dbi_dbs))
 
 			hasil_pca['DBSCAN']=labels_db
 
@@ -158,12 +162,45 @@ def run_cl_app():
 			rekap_sil.columns=['Algoritma','Silhouette','DBI']
 			st.dataframe(rekap_sil.iloc[:,:2])
 
-	if submenu == 'Evaluasi':
-		st.write('Evaluasi')
+	if submenu == 'Hasil':
+		st.write('Hasil')
 
 		with st.expander('K Medoids'):
 			st.write('K Medoids')
-
+			kMedoids =KMedoids(n_clusters=2, random_state=0)
+			kMedoids.fit(vin_scale)
+			y_kmed_opt = kMedoids.fit_predict(vin_scale)
+			score_kmo=silhouette_score(vin_scale,y_kmed_opt)
+			dbi_km = davies_bouldin_score(vin_scale,y_kmed_opt)
+			# st.write("Silhouette Score : {:.4f}".format(np.mean(score))) 
+			st.write('Nilai Silhouette :{:.4f}, Nilai DBI :{:.4f}'.format(score_kmo,dbi_km))
+			hasil_pca['kemdoid_opt']=y_kmed_opt
+			fig, ax = plt.subplots()
+			plt.title("K-Medoid Clustering")
+			plt.xlabel("PC1")
+			plt.ylabel("PC2")
+			scatter = ax.scatter(hasil_pca['Feature A'], hasil_pca['Feature B'], c=hasil_pca['kemdoid_opt'])
+			legend = ax.legend(*scatter.legend_elements(), title="Clusters", bbox_to_anchor=(1.05, 1), loc='upper left')
+			ax.add_artist(legend)
+			st.pyplot(fig)
 
 		with st.expander('Fuzzy C-Means'):
 			st.write('Fuzzy C-Means')
+			x=vin_scale.values
+			fcm_model = fuzz.cluster.cmeans(x.T, 3, 2, error=0.005, maxiter=1000)
+			# mendapatkan label klaster
+			cluster_membership = fcm_model[1]
+			labels_fuzz_opt = cluster_membership.argmax(axis=0)
+			silhouette_avg = silhouette_score(x, labels_fuzz_opt)
+			# st.write("Silhouette Score : {:.4f}".format(np.mean(silhouette_avg)))
+			dbi_fc = davies_bouldin_score(vin_scale,labels_fuzz_opt)
+			st.write('Nilai Silhouette :{:.4f}, Nilai DBI :{:.4f}'.format(silhouette_avg,dbi_fc))
+			hasil_pca['fcm_opt']=labels_fuzz_opt
+			fig, ax = plt.subplots()
+			plt.title("FCM Clustering")
+			plt.xlabel("PC1")
+			plt.ylabel("PC2")
+			scatter = ax.scatter(hasil_pca['Feature A'], hasil_pca['Feature B'], c=hasil_pca['fcm_opt'])
+			legend = ax.legend(*scatter.legend_elements(), title="Clusters", bbox_to_anchor=(1.05, 1), loc='upper left')
+			ax.add_artist(legend)
+			st.pyplot(fig)
